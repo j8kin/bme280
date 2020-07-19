@@ -1,10 +1,9 @@
 package bme280;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,12 +34,20 @@ public class bme280Registers {
         
         if (buffer.order() == ByteOrder.BIG_ENDIAN) {
             for (int i = 0; i < size; i++) {
-                result += buffer.get()*(long)Math.pow(2, 8*i);
+                // buffer.get read byte as signed but actually it stored as unsigned value !!!
+                long fromBuffer = buffer.get();
+                // convert signed to unsigned
+                fromBuffer = fromBuffer < 0 ? fromBuffer + 256: fromBuffer;
+                result += fromBuffer << 8*i;
             }
         }
         else {
             for (int i = 0; i < size; i++) {
-                result += buffer.get()*(long)Math.pow(2, 8*(size-i-1));
+                // buffer.get read byte as signed but actually it stored as unsigned value !!!
+                long fromBuffer = buffer.get();
+                // convert signed to unsigned
+                fromBuffer = fromBuffer < 0 ? fromBuffer + 256: fromBuffer;
+                result += fromBuffer << 8*(size-i-1);
             }           
         }
         return result;
@@ -68,7 +75,7 @@ public class bme280Registers {
     /**
      * Read one byte of data from Register
      * @param register - register of BME280 to be read (0xD0, 0xE0, etc)
-     * @return bme280 register value
+     * @return bme280 register value (unsigned)
      */
     private long readRegister(int register) {
         return readRegister(register, 1);
@@ -78,7 +85,7 @@ public class bme280Registers {
      * Read number of bytes from bme280 register
      * @param register - register to be read
      * @param size - number of bytes to be read
-     * @return bme280 register data
+     * @return bme280 register data as unsigned value
      */
     private long readRegister(int register, int size) {
         try {
@@ -340,5 +347,90 @@ public class bme280Registers {
         long lbs = readRegister(0xFE);
 
         return (lbs << 7) | msb;
+    }
+
+    /**
+     * Convert unsigned value to signed based on number of bytes in input
+     * @param input - input integer number (unsigned)
+     * @param nBytes - number of bytes in word (1, 2, 4, 8)
+     * @return signed number
+     */
+    private long toSigned(long input, int nBytes) {
+        assert nBytes == 1 || nBytes == 2 || nBytes == 4 || nBytes == 8;
+        final long mask = 0x1 << (nBytes*8 - 1) ;
+        if ((input & mask) == mask) {
+            switch (nBytes) {
+                case 1:
+                    return input - 1 - 0xFF;
+                case 2:
+                    return input - 1 - 0xFFFF;
+                case 4:
+                    return input - 1 - 0xFFFFFFFF;
+                case 8:
+                    return input - 1 - 0xFFFFFFFFFFFFFFFFL;
+                default:
+                    return input;
+            }    
+        }
+        return input;
+    }
+    // Calibration Parameter Table 16:
+    // |----------------|-------------------|-----------------|
+    // |    Register    |  Register Context | Data type       |
+    // |    Address     |                   |                 |
+    // |----------------|-------------------|-----------------|
+    // |   0x88/0x89    | digT1[7:0]/[15:8] | unsigned short  |
+    // |   0x8A/0x8B    | digT2[7:0]/[15:8] | signed short    |
+    // |   0x8C/0x8D    | digT3[7:0]/[15:8] | signed short    |
+    // |                |                   |                 |
+    // |   0x8E/0x8F    | digP1[7:0]/[15:8] | unsigned short  |
+    // |   0x90/0x91    | digP2[7:0]/[15:8] | signed short    |
+    // |   0x92/0x93    | digP3[7:0]/[15:8] | signed short    |
+    // |   0x94/0x95    | digP4[7:0]/[15:8] | signed short    |
+    // |   0x96/0x97    | digP5[7:0]/[15:8] | signed short    |
+    // |   0x98/0x99    | digP6[7:0]/[15:8] | signed short    |
+    // |   0x9A/0x9B    | digP7[7:0]/[15:8] | signed short    |
+    // |   0x9C/0x9D    | digP8[7:0]/[15:8] | signed short    |
+    // |   0x9E/0x9F    | digP9[7:0]/[15:8] | signed short    |
+    // |                |                   |                 |
+    // |      0xA1      | digH1[7:0]        | unsigned char   | !!!!
+    // |   0xE1/0xE2    | digH2[7:0]/[15:8] | signed short    |
+    // |      0xE3      | digH3[7:0]        | unsigned char   | !!!!
+    // | 0xE4/0xE5[3:0] | digH4[11:4]/[3:0] | unsigned short  | !!!!
+    // | 0xE5[7:4]/0xE6 | digH5[3:0]/[11:4] | unsigned short  | !!!!
+    // |      0xE7      | digH6[7:0]        | signed char     |
+    // |----------------|-------------------|-----------------|
+    /**
+     * Read Calibration Data from sensor and return as Map
+     * @return Calibration Data
+     */
+    public Map<Calibration,Long> getCalibrationParameters() {
+        Map<Calibration,Long> result = new HashMap<Calibration,Long>();
+
+        // fill Calibration data for temperature
+        result.put(Calibration.digT1, readRegister(0x88,2)); // unsigned
+        result.put(Calibration.digT2, toSigned(readRegister(0x8A,2), 2));
+        result.put(Calibration.digT2, toSigned(readRegister(0x8A,2), 2));
+        result.put(Calibration.digT3, toSigned(readRegister(0x8C,2), 2));
+
+        // fill Calibration data for Pressure
+        result.put(Calibration.digP1, readRegister(0x8E,2));
+        result.put(Calibration.digP2, toSigned(readRegister(0x90,2), 2));
+        result.put(Calibration.digP3, toSigned(readRegister(0x92,2), 2));
+        result.put(Calibration.digP4, toSigned(readRegister(0x94,2), 2));
+        result.put(Calibration.digP5, toSigned(readRegister(0x96,2), 2));
+        result.put(Calibration.digP6, toSigned(readRegister(0x98,2), 2));
+        result.put(Calibration.digP7, toSigned(readRegister(0x9A,2), 2));
+        result.put(Calibration.digP8, toSigned(readRegister(0x9C,2), 2));
+        result.put(Calibration.digP9, toSigned(readRegister(0x9E,2), 2));
+
+        // // fill Calibration data for Humidity
+        result.put(Calibration.digH1, readRegister(0xA1,1));
+        result.put(Calibration.digH2, toSigned(readRegister(0xE1,2), 2));
+        result.put(Calibration.digH3, readRegister(0xE3,1));
+        result.put(Calibration.digH4, readRegister(0xE4,1) << 4 | (readRegister(0xE5,1) & 0x0F)); // 0xE4/0xE5[3:0]
+        result.put(Calibration.digH5, readRegister(0xE6,1) << 4 | ((readRegister(0xE5,1) & 0xF0) >> 4)); // 0xE5[7:4]/0xE6
+        result.put(Calibration.digH6, toSigned(readRegister(0xE7,1), 1));
+        return result;
     }
 }
