@@ -1,6 +1,6 @@
 package bme280;
 
-public enum Calibration {
+enum Calibration {
     /** Temperature Calibration Parameter 1 (unsigned 16 bit integer) */
     digT1,
     /** Temperature Calibration Parameter 2 (signed 16 bit integer) */
@@ -40,6 +40,8 @@ public enum Calibration {
     /** Humidity Calibration Parameter 6 (signed 8 bit integer) */
     digH6,
 
-    /** a fine resolution temperature value over to the pressure and humidity compensation formula (signed 32 bit integer) */
+    /** a fine resolution temperature value over to the pressure and humidity compensation formula.
+     *  This parameter is calculated in while calculating temperature
+     * (signed 32 bit integer) */
     tFine;
 }

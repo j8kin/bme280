@@ -12,17 +12,17 @@ package bme280;
 // |  101  | oversampling x 16                   |
 // | other | oversampling x 16                   |
 // |-------|-------------------------------------|
-public enum oversampling {
+public enum Oversampling {
     SKIPPED(0b000), OVERSAMPLING1(0b001), OVERSAMPLING2(0b010), OVERSAMPLING4(0b011), OVERSAMPLING8(0b100), OVERSAMPLING16(0b101);
 
     private final byte byteVal;
 
-    private oversampling(int byteVal) {
+    private Oversampling(int byteVal) {
         assert byteVal >= 0b000 && byteVal <= 0b111;
         this.byteVal = (byte) byteVal;
     }
 
-    public static final oversampling fromInteger(int value) {
+    public static final Oversampling fromInteger(int value) {
         switch(value) {
             case 0b000: return SKIPPED;
             case 0b001: return OVERSAMPLING1;

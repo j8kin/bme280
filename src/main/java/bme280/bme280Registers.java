@@ -13,11 +13,11 @@ import jdk.dio.i2cbus.I2CDevice;
 /**
  * Register description. Section 5 from bme280 datasheet (BST-BME280-DS002.pdf)
  */
-public class bme280Registers {
-    private final static Logger logger = LogManager.getLogger(bme280Registers.class);
+class Bme280Registers {
+    private final static Logger logger = LogManager.getLogger(Bme280Registers.class);
     private I2CDevice device;
 
-    public bme280Registers(I2CDevice bme280) {
+    public Bme280Registers(I2CDevice bme280) {
         device = bme280;
     }
 
@@ -168,11 +168,11 @@ public class bme280Registers {
     // Attention!!! 
     // Changes to this register only become effective after a write operation to measurmentControl
     // Only bits 2:0 are used as oversampling (see Oversampling Table above)
-    private oversampling getHumidityControl() {
-        return oversampling.fromInteger(((int)readRegister(0xF2) & 0x07));
+    private Oversampling getHumidityControl() {
+        return Oversampling.fromInteger(((int)readRegister(0xF2) & 0x07));
     }
 
-    public void setHumidityControl(oversampling oversampling) {
+    public void setHumidityControl(Oversampling oversampling) {
         long data = readRegister(0xF2) & 0xF8; // set humidity control bits to zero
         data |= oversampling.toByte(); // place temperature oversampling into bits [2:0]
         writeRegister(0xF2, data);
@@ -217,40 +217,40 @@ public class bme280Registers {
     // |           |              |  01 and 10  | Forced Mode                            |
     // |           |              |     11      | Normal Mode                            |
     // |-----------|--------------|------------------------------------------------------|
-    private oversampling getTemperatureControl() {
-        return oversampling.fromInteger((int) ((readRegister(0xF4) & 0xE0) >> 5));
+    private Oversampling getTemperatureControl() {
+        return Oversampling.fromInteger((int) ((readRegister(0xF4) & 0xE0) >> 5));
     }
 
-    private oversampling getPressureControl() {
-        return oversampling.fromInteger((int)((readRegister(0xF4) & 0x1C) >> 2));
+    private Oversampling getPressureControl() {
+        return Oversampling.fromInteger((int)((readRegister(0xF4) & 0x1C) >> 2));
     }
 
-    private mode getModeControl() {
+    private Mode getModeControl() {
         switch((byte) (readRegister(0xF4) & 0x03)) {
             case 0b00: 
-                return mode.SLEEP;
+                return Mode.SLEEP;
             case 0b01:
             case 0b10:
-                return mode.FORCED;
+                return Mode.FORCED;
             case 0b11:
             default:
-                return mode.NORMAL;
+                return Mode.NORMAL;
         }
     }
 
-    public void setTemperatureControl(oversampling oversampling) {
+    public void setTemperatureControl(Oversampling oversampling) {
         long data = readRegister(0xF4) & 0x01F; // store only current pressure control and mode
         data |= oversampling.toByte() << 5; // place temperature oversampling into bits [7:5]
         writeRegister(0xF4, data);
     }
 
-    public void setPressureControl(oversampling oversampling) {
+    public void setPressureControl(Oversampling oversampling) {
         long data = readRegister(0xF4) & 0x0E3; // store only current temperature control and mode
         data |= oversampling.toByte() << 2; // place temperature oversampling into bits [4:2]
         writeRegister(0xF4, data);
     }
 
-    public void setMode(mode mode) {
+    public void setMode(Mode mode) {
         long data = readRegister(0xF4) & 0x0FC; // store only current temperature and humidity control 
         data |= mode.toByte(); // place temperature oversampling into bits [1:0]
         writeRegister(0xF4, data);
@@ -287,25 +287,25 @@ public class bme280Registers {
     // |-----------|--------------|------------------------------------------------------|
     // |     0     | spi3w_en[0]  | Enables 3-wire SPI interface when set to 1           |
     // |-----------|--------------|------------------------------------------------------|
-    private standby getStandby() {
-        return standby.fromInteger((int)(readRegister(0xF5) & 0xE0) >> 5);
+    private Standby getStandby() {
+        return Standby.fromInteger((int)(readRegister(0xF5) & 0xE0) >> 5);
     }
 
-    private filter getFilter() {
-        return filter.fromInteger((int)(readRegister(0xF5) & 0x1C) >> 2);
+    private Filter getFilter() {
+        return Filter.fromInteger((int)(readRegister(0xF5) & 0x1C) >> 2);
     }
 
     private boolean getSpiEnabled() {
         return (readRegister(0xF5) & 0x01) == 1;
     }
 
-    public void setStandby(standby value) {
+    public void setStandby(Standby value) {
         long data = readRegister(0xF5) & 0x01F; // store only filter coefficient and SPI Enabled 
         data |= value.toByte() << 5; // place temperature oversampling into bits [7:5]
         writeRegister(0xF5, data);
     }
 
-    public void setFilter(filter value) {
+    public void setFilter(Filter value) {
         long data = readRegister(0xF5) & 0x0E3; // store only T-Standby and SPI Enabled 
         data |= value.toByte() << 2; // place temperature oversampling into bits [4:2]
         writeRegister(0xF5, data);
@@ -431,6 +431,7 @@ public class bme280Registers {
         result.put(Calibration.digH4, readRegister(0xE4,1) << 4 | (readRegister(0xE5,1) & 0x0F)); // 0xE4/0xE5[3:0]
         result.put(Calibration.digH5, readRegister(0xE6,1) << 4 | ((readRegister(0xE5,1) & 0xF0) >> 4)); // 0xE5[7:4]/0xE6
         result.put(Calibration.digH6, toSigned(readRegister(0xE7,1), 1));
+        
         return result;
     }
 }

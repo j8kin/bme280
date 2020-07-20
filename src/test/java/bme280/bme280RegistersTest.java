@@ -16,11 +16,11 @@ import java.util.Map;
 class bme280RegistersTest {
 
     private final I2CDevice device;
-    private final bme280Registers registers;
+    private final Bme280Registers registers;
 
     bme280RegistersTest() {
         device = Mockito.mock(I2CDevice.class);
-        registers = new bme280Registers(device);
+        registers = new Bme280Registers(device);
     }
 
     /**
@@ -99,12 +99,12 @@ class bme280RegistersTest {
                     return 1;
                 });
 
-                ByteBuffer src = ByteBuffer.allocateDirect(8).put(oversampling.OVERSAMPLING8.toByte()).rewind();
+                ByteBuffer src = ByteBuffer.allocateDirect(8).put(Oversampling.OVERSAMPLING8.toByte()).rewind();
                 Mockito.when(device.write(0xF2, 1, src)).thenAnswer(
                     invocation -> {
                         Object[] args = invocation.getArguments();
                     
-                        assertEquals(oversampling.OVERSAMPLING8.toByte(), ((ByteBuffer)args[2]).rewind().get());
+                        assertEquals(Oversampling.OVERSAMPLING8.toByte(), ((ByteBuffer)args[2]).rewind().get());
     
                         return 1;
                     });
@@ -112,7 +112,7 @@ class bme280RegistersTest {
         catch (Exception e) {
             fail("Device could not be read");
         }
-        registers.setHumidityControl(oversampling.OVERSAMPLING8);
+        registers.setHumidityControl(Oversampling.OVERSAMPLING8);
 
         assertTrue(true, "Humidity Control set successfully");
     }

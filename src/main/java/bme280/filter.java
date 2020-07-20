@@ -9,16 +9,16 @@ package bme280;
 //|    011     | 8                                      |
 //|100, other  | 16                                     |
 //|------------|----------------------------------------|
-public enum filter {
+public enum Filter {
     OFF(0b000), C2(0b001), C4(0b010), C8(0b011), C16(0b100);
 
     private final byte byteVal;
 
-    private filter(int byteVal) {
+    private Filter(int byteVal) {
         this.byteVal = (byte) byteVal;
     }
 
-    public static final filter fromInteger(int value) {
+    public static final Filter fromInteger(int value) {
         switch(value) {
             case 0b000: return OFF;
             case 0b001: return C2;
