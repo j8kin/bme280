@@ -12,6 +12,7 @@ import jdk.dio.i2cbus.I2CDevice;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
 class Bme280RegistersTest {
 
     private final I2CDevice mockI2CDevice;

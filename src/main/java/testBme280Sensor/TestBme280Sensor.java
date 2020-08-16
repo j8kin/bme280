@@ -32,8 +32,5 @@ public final class TestBme280Sensor {
         catch (Exception e) {
             System.out.println("Unhandled exception:\n" + e.toString());
         }
-
-        
     }
-
 };
