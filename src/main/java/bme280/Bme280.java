@@ -1,5 +1,6 @@
 package bme280;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import jdk.dio.DeviceManager;
@@ -10,13 +11,14 @@ import jdk.dio.i2cbus.I2CDeviceConfig;
 
 public final class Bme280 {
     private final Bme280Registers bme280Registres;
-    private Map<Calibration,Long> calibrationData;
+    private final Map<Calibration,Long> calibrationData  = new HashMap<>();
+    private final Map<SensorType, Oversampling> oversampling = new HashMap<>();
 
     /**
      * Default constructor which use device address 0x90
      */
     public Bme280() {
-        this(0x90);
+        this(0x76);
     }
 
     /**
@@ -37,7 +39,24 @@ public final class Bme280 {
         }
         catch (Exception e) {
             // todo ???
-            bme280Registres = null;
+            // bme280Registres = null;
+        }
+    }
+
+    /**
+     * Set new Oversampling
+     * @param SensorType - sensor to be set with new Overampling dta
+     * @param initialOversampling - new sensor oversampling data
+     */
+    public void setOversamplingData(SensorType sensor, Oversampling newOversampling) {
+        if (sensor == SensorType.TEMPERATURE) {
+            bme280Registres.setTemperatureControl(newOversampling);
+        }
+        if (sensor == SensorType.HUMIDITY) {
+            bme280Registres.setHumidityControl(newOversampling);
+        }
+        if (sensor == SensorType.PRESSURE) {
+            bme280Registres.setPressureControl(newOversampling);
         }
     }
 
