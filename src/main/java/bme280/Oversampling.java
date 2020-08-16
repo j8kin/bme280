@@ -13,7 +13,8 @@ package Bme280;
 // | other | oversampling x 16                   |
 // |-------|-------------------------------------|
 public enum Oversampling {
-    SKIPPED(0b000), OVERSAMPLING1(0b001), OVERSAMPLING2(0b010), OVERSAMPLING4(0b011), OVERSAMPLING8(0b100), OVERSAMPLING16(0b101);
+    SKIPPED(0b000), OVERSAMPLING1(0b001), OVERSAMPLING2(0b010), OVERSAMPLING4(0b011), OVERSAMPLING8(0b100),
+    OVERSAMPLING16(0b101);
 
     private final byte byteVal;
 
@@ -23,12 +24,17 @@ public enum Oversampling {
     }
 
     public static final Oversampling fromInteger(int value) {
-        switch(value) {
-            case 0b000: return SKIPPED;
-            case 0b001: return OVERSAMPLING1;
-            case 0b010: return OVERSAMPLING2;
-            case 0b011: return OVERSAMPLING4;
-            case 0b100: return OVERSAMPLING8;
+        switch (value) {
+            case 0b000:
+                return SKIPPED;
+            case 0b001:
+                return OVERSAMPLING1;
+            case 0b010:
+                return OVERSAMPLING2;
+            case 0b011:
+                return OVERSAMPLING4;
+            case 0b100:
+                return OVERSAMPLING8;
             case 0b101:
             default:
                 return OVERSAMPLING16;

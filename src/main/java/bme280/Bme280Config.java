@@ -14,25 +14,25 @@ public class Bme280Config {
     private I2CDeviceConfig bme280I2CDeviceConfig;
     private int bme280I2CDeviceId;
 
+    public static final class Builder {
+        private final Bme280Config instance = new Bme280Config();
 
-    public static final  class Builder {
-        private  final Bme280Config instance = new Bme280Config();
+        public Builder() {
+        }
 
-        public Builder() {}
-
-        /** 
+        /**
          * Build BME280Config
          */
         public Bme280Config build() throws Exception {
 
             if (instance.bme280Device == null) {
-                // trying to create bme280Device based on bme280I2CDeviceConfig or default configuration
+                // trying to create bme280Device based on bme280I2CDeviceConfig or default
+                // configuration
                 if (instance.bme280I2CDeviceConfig == null) {
-                    instance.bme280I2CDeviceConfig = new I2CDeviceConfig.Builder()
-                        .setControllerNumber(1) // todo
-                        .setAddress(instance.bme280I2CDeviceId, I2CDeviceConfig.ADDR_SIZE_10) //todo
-                        .setClockFrequency(8000000) // todo
-                        .build();
+                    instance.bme280I2CDeviceConfig = new I2CDeviceConfig.Builder().setControllerNumber(1) // todo
+                            .setAddress(instance.bme280I2CDeviceId, I2CDeviceConfig.ADDR_SIZE_10) // todo
+                            .setClockFrequency(8000000) // todo
+                            .build();
                 }
                 // create I2CDevice instance
                 instance.bme280Device = DeviceManager.open(instance.bme280I2CDeviceConfig);
@@ -89,19 +89,23 @@ public class Bme280Config {
             return this;
         }
     }
-    
+
     public Oversampling getHumidityControl() {
         return humidity;
     }
+
     public Oversampling getTemperatureControl() {
         return temperature;
     }
+
     public Oversampling getPressureControl() {
         return pressure;
     }
+
     public Filter getFilter() {
         return filter;
     }
+
     public Standby getStandby() {
         return standby;
     }
@@ -110,10 +114,10 @@ public class Bme280Config {
         return bme280Device;
     }
 
-    /** 
+    /**
      * private constructor. Builder should be used to create Bme280Config instance
      */
-    private Bme280Config() { 
+    private Bme280Config() {
         bme280I2CDeviceId = 0x76;
         humidity = Oversampling.OVERSAMPLING1;
         temperature = Oversampling.OVERSAMPLING1;

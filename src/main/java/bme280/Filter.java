@@ -19,11 +19,15 @@ public enum Filter {
     }
 
     public static final Filter fromInteger(int value) {
-        switch(value) {
-            case 0b000: return OFF;
-            case 0b001: return C2;
-            case 0b010: return C4;
-            case 0b011: return C8;
+        switch (value) {
+            case 0b000:
+                return OFF;
+            case 0b001:
+                return C2;
+            case 0b010:
+                return C4;
+            case 0b011:
+                return C8;
             case 0b100:
             default:
                 return C16;

@@ -7,7 +7,7 @@ enum Calibration {
     digT2,
     /** Temperature Calibration Parameter 3 (signed 16 bit integer) */
     digT3,
-    
+
     /** Pressure Calibration Parameter 1 (unsigned 16 bit integer) */
     digP1,
     /** Pressure Calibration Parameter 2 (signed 16 bit integer) */
@@ -40,8 +40,10 @@ enum Calibration {
     /** Humidity Calibration Parameter 6 (signed 8 bit integer) */
     digH6,
 
-    /** a fine resolution temperature value over to the pressure and humidity compensation formula.
-     *  This parameter is calculated in while calculating temperature
-     * (signed 32 bit integer) */
+    /**
+     * a fine resolution temperature value over to the pressure and humidity
+     * compensation formula. This parameter is calculated in while calculating
+     * temperature (signed 32 bit integer)
+     */
     tFine;
 }
