@@ -15,12 +15,66 @@ import java.util.Map;
 
 class bme280RegistersTest {
 
-    private final I2CDevice device;
-    private final Bme280Sensor registers;
+    private final I2CDevice mockI2CDevice;
+    private Bme280Sensor bme280Sensor;
 
     bme280RegistersTest() {
-        device = Mockito.mock(I2CDevice.class);
-        registers = new Bme280Sensor(device);
+        mockI2CDevice = Mockito.mock(I2CDevice.class);
+
+        ByteBuffer oneByte = ByteBuffer.allocateDirect(1);
+        ByteBuffer eightBytes = ByteBuffer.allocateDirect(8);
+
+        try {
+            // Mock answer for Bme280Sensor.setHumidityControl
+            Mockito.when(mockI2CDevice.read(0xF2, 1, 0, oneByte)).thenAnswer(
+                invocation -> {
+                    Object[] args = invocation.getArguments();
+                    ((ByteBuffer)args[3]).put((byte) 0);
+                    return 1;
+                });
+            Mockito.when(mockI2CDevice.write(0xF2, 1, eightBytes.put((byte)0).rewind())).thenAnswer(
+                invocation -> {                        
+                    return 1;
+                });
+    
+            // Mock answer for Bme280Sensor.setPressureControl or SetHumidityControl
+            Mockito.when(mockI2CDevice.read(0xF4, 1, 0, oneByte)).thenAnswer(
+                invocation -> {
+                    Object[] args = invocation.getArguments();
+                    ((ByteBuffer)args[3]).put((byte) 0);
+                    return 1;
+                });
+            Mockito.when(mockI2CDevice.write(0xF4, 1, eightBytes.put((byte)0).rewind())).thenAnswer(
+                invocation -> {                        
+                    return 1;
+                });
+
+            // Mock answer to Bme280Sensor.setFilter or setStandby
+            Mockito.when(mockI2CDevice.read(0xF5, 1, 0, oneByte)).thenAnswer(
+                invocation -> {
+                    Object[] args = invocation.getArguments();
+                    ((ByteBuffer)args[3]).put((byte) 0);
+                    return 1;
+                });
+            Mockito.when(mockI2CDevice.write(0xF5, 1, eightBytes.put((byte)0).rewind())).thenAnswer(
+                invocation -> {                        
+                    return 1;
+                });
+
+            bme280Sensor = new Bme280Sensor(
+                new Bme280Config.Builder()
+                .setOversampling(SensorType.TEMPERATURE, Oversampling.SKIPPED)
+                .setOversampling(SensorType.PRESSURE, Oversampling.SKIPPED)
+                .setOversampling(SensorType.HUMIDITY, Oversampling.SKIPPED)
+                .setFilter(Filter.OFF)
+                .setStandBy(Standby.MSEC5)
+                .setI2CDevice(mockI2CDevice)
+                .build());
+        }
+
+        catch (Exception e) {
+            fail("Unable to initialize test");
+        }
     }
 
     /**
@@ -31,7 +85,7 @@ class bme280RegistersTest {
         try {
             ByteBuffer dest = ByteBuffer.allocateDirect(1);
 
-            Mockito.when(device.read(0xD0, 1, 0, dest)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xD0, 1, 0, dest)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments();
                     ((ByteBuffer)args[3]).put((byte) 0x60);
@@ -41,7 +95,7 @@ class bme280RegistersTest {
         catch (Exception e) {
             fail("Device could not be read");
         }
-        assertEquals(0x60, registers.getId());
+        assertEquals(0x60, bme280Sensor.getId());
     }
 
     @Test
@@ -49,7 +103,7 @@ class bme280RegistersTest {
         try {
             ByteBuffer dest = ByteBuffer.allocateDirect(1);
 
-            Mockito.when(device.read(0xD0, 1, 0, dest)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xD0, 1, 0, dest)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments();
                     ((ByteBuffer)args[3]).order(ByteOrder.LITTLE_ENDIAN);
@@ -61,14 +115,14 @@ class bme280RegistersTest {
         catch (Exception e) {
             fail("Device could not be read");
         }
-        assertEquals(0x60, registers.getId());
+        assertEquals(0x60, bme280Sensor.getId());
     }
 
     @Test
     void testResetBigEndian() {
         try {
             ByteBuffer src = ByteBuffer.allocateDirect(8).put((byte)0xB6).rewind();
-            Mockito.when(device.write(0xE0, 1, src)).thenAnswer(
+            Mockito.when(mockI2CDevice.write(0xE0, 1, src)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments();
                     // 0xB6 == 182 the significant byte is 1 since java dont have unsigned convert to int with (+ 256)
@@ -82,7 +136,7 @@ class bme280RegistersTest {
             fail("Device could not be write");
         }
 
-        registers.reset();
+        bme280Sensor.reset();
         assertTrue(true, "Register written successfully");
     }
 
@@ -91,7 +145,7 @@ class bme280RegistersTest {
         try {
             ByteBuffer dest = ByteBuffer.allocateDirect(1);
 
-            Mockito.when(device.read(0xF2, 1, 0, dest)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xF2, 1, 0, dest)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments();
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN).put((byte)0b110).rewind();
@@ -100,7 +154,7 @@ class bme280RegistersTest {
                 });
 
                 ByteBuffer src = ByteBuffer.allocateDirect(8).put(Oversampling.OVERSAMPLING8.toByte()).rewind();
-                Mockito.when(device.write(0xF2, 1, src)).thenAnswer(
+                Mockito.when(mockI2CDevice.write(0xF2, 1, src)).thenAnswer(
                     invocation -> {
                         Object[] args = invocation.getArguments();
                     
@@ -112,7 +166,7 @@ class bme280RegistersTest {
         catch (Exception e) {
             fail("Device could not be read");
         }
-        registers.setHumidityControl(Oversampling.OVERSAMPLING8);
+        bme280Sensor.setHumidityControl(Oversampling.OVERSAMPLING8);
 
         assertTrue(true, "Humidity Control set successfully");
     }
@@ -124,7 +178,7 @@ class bme280RegistersTest {
             ByteBuffer dest1Byte = ByteBuffer.allocateDirect(1);
 
             // DigT1
-            Mockito.when(device.read(0x88, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x88, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -133,7 +187,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigT2
-            Mockito.when(device.read(0x8A, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x8A, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -143,7 +197,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigT3
-            Mockito.when(device.read(0x8C, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x8C, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -153,7 +207,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP1
-            Mockito.when(device.read(0x8E, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x8E, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -162,7 +216,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP2
-            Mockito.when(device.read(0x90, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x90, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -171,7 +225,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP3
-            Mockito.when(device.read(0x92, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x92, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -181,7 +235,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP4
-            Mockito.when(device.read(0x94, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x94, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -191,7 +245,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP5
-            Mockito.when(device.read(0x96, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x96, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -201,7 +255,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP6
-            Mockito.when(device.read(0x98, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x98, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -211,7 +265,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP7
-            Mockito.when(device.read(0x9A, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x9A, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -221,7 +275,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP8
-            Mockito.when(device.read(0x9C, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x9C, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -231,7 +285,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigP9
-            Mockito.when(device.read(0x9E, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0x9E, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -242,7 +296,7 @@ class bme280RegistersTest {
                 });
 
             // DigH1
-            Mockito.when(device.read(0xA1, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xA1, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -252,7 +306,7 @@ class bme280RegistersTest {
                 });
 
             // DigH2
-            Mockito.when(device.read(0xE1, 2, 0, dest2Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE1, 2, 0, dest2Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -262,7 +316,7 @@ class bme280RegistersTest {
                     return 2;
                 });
             // DigH3
-            Mockito.when(device.read(0xE3, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE3, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -272,21 +326,21 @@ class bme280RegistersTest {
                 });
             // DigH4/H5
             // E4:E6 = [0xFF, 0x75, 0xAA] -> H4 == 0xFF5; H5 == 0xAA7
-            Mockito.when(device.read(0xE4, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE4, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
                     ((ByteBuffer)args[3]).put((byte) 0xFF);
                     return 1;
                 });
-            Mockito.when(device.read(0xE5, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE5, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
                     ((ByteBuffer)args[3]).put((byte) 0x75);
                     return 1;
                 });
-            Mockito.when(device.read(0xE6, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE6, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -294,7 +348,7 @@ class bme280RegistersTest {
                     return 1;
                 });
             // DigH6
-            Mockito.when(device.read(0xE7, 1, 0, dest1Byte)).thenAnswer(
+            Mockito.when(mockI2CDevice.read(0xE7, 1, 0, dest1Byte)).thenAnswer(
                 invocation -> {
                     Object[] args = invocation.getArguments(); 
                     ((ByteBuffer)args[3]).order(ByteOrder.BIG_ENDIAN);
@@ -307,7 +361,7 @@ class bme280RegistersTest {
             fail("Device could not be read");
         }
 
-        Map<Calibration,Long> calibration = registers.getCalibrationParameters();
+        Map<Calibration,Long> calibration = bme280Sensor.getCalibrationParameters();
 
         assertEquals(0x8988, calibration.get(Calibration.digT1));
         assertEquals(-29814, calibration.get(Calibration.digT2));

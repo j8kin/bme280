@@ -33,11 +33,6 @@ final class Bme280Sensor {
         setStandby(bme280Config.getStandby());
     }
 
-    @Deprecated
-    public Bme280Sensor(I2CDevice bme280) {
-        device = bme280;
-    }
-
     /**
      * Convert Byte Buffer to long (8 byte???)
      * @param buffer - buffer to convert
