@@ -13,9 +13,14 @@ import jdk.dio.i2cbus.I2CDevice;
 /**
  * Register description. Section 5 from bme280 datasheet (BST-BME280-DS002.pdf)
  */
-class Bme280Registers {
+final class Bme280Registers {
     private final static Logger logger = LogManager.getLogger(Bme280Registers.class);
     private I2CDevice device;
+
+    @Deprecated
+    private Bme280Registers() {
+        throw new AssertionError();
+    };
 
     public Bme280Registers(I2CDevice bme280) {
         device = bme280;
