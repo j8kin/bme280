@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -6,14 +6,7 @@ import org.mockito.Mockito;
 import jdk.dio.i2cbus.I2CDevice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.util.Map;
-
-class bme280RegistersTest {
+class Bme280RegistersTest {
 
     private final I2CDevice mockI2CDevice;
     private Bme280Sensor bme280Sensor;

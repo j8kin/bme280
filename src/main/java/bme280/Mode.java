@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 public enum Mode {
     SLEEP(0b00), FORCED(0b01), NORMAL(0b11);

@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 import jdk.dio.DeviceManager;
 import jdk.dio.i2cbus.I2CDevice;

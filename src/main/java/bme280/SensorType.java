@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 public enum SensorType {
     TEMPERATURE, HUMIDITY, PRESSURE;

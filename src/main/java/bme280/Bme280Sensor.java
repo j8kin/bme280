@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,7 +13,7 @@ import jdk.dio.i2cbus.I2CDevice;
 /**
  * Register description. Section 5 from bme280 datasheet (BST-BME280-DS002.pdf)
  */
-final class Bme280Sensor {
+final public class Bme280Sensor {
     private final static Logger logger = LogManager.getLogger(Bme280Sensor.class);
     private I2CDevice device;
 

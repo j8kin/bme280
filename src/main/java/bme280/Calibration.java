@@ -1,4 +1,4 @@
-package bme280;
+package Bme280;
 
 enum Calibration {
     /** Temperature Calibration Parameter 1 (unsigned 16 bit integer) */
