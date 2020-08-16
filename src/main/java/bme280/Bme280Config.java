@@ -4,7 +4,7 @@ import jdk.dio.DeviceManager;
 import jdk.dio.i2cbus.I2CDevice;
 import jdk.dio.i2cbus.I2CDeviceConfig;
 
-public class Bme289Config {
+public class Bme280Config {
     private Oversampling humidity;
     private Oversampling temperature;
     private Oversampling pressure;
@@ -16,14 +16,14 @@ public class Bme289Config {
 
 
     public static final  class Builder {
-        private  final Bme289Config instance = new Bme289Config();
+        private  final Bme280Config instance = new Bme280Config();
 
         public Builder() {}
 
         /** 
          * Build BME280Config
          */
-        public Bme289Config build() throws Exception {
+        public Bme280Config build() throws Exception {
 
             if (instance.bme280Device == null) {
                 // trying to create bme280Device based on bme280I2CDeviceConfig or default configuration
@@ -40,7 +40,7 @@ public class Bme289Config {
             return instance;
         }
 
-        public Builder setOversampling(SensorType sensor, Oversampling oversampling) {
+        public Builder setOversampling(final SensorType sensor, final Oversampling oversampling) {
             if (sensor == SensorType.TEMPERATURE) {
                 instance.temperature = oversampling;
             }
@@ -53,35 +53,35 @@ public class Bme289Config {
             return this;
         }
 
-        public Builder setFilter(Filter filter) {
+        public Builder setFilter(final Filter filter) {
             instance.filter = filter;
             return this;
         }
 
-        public Builder setStandBy(Standby standby) {
+        public Builder setStandBy(final Standby standby) {
             instance.standby = standby;
             return this;
         }
 
-        public Builder setI2CDevice(I2CDevice bme280Device) {
+        public Builder setI2CDevice(final I2CDevice bme280Device) {
             instance.bme280Device = bme280Device;
             return this;
         }
 
-        public Builder setI2CDeviceConfig(I2CDeviceConfig bme280I2CDeviceConfig) {
+        public Builder setI2CDeviceConfig(final I2CDeviceConfig bme280I2CDeviceConfig) {
             instance.bme280I2CDeviceConfig = bme280I2CDeviceConfig;
             return this;
         }
 
         /**
-         * Setup BME280 device id on i2c bus
-         *  to verify connect bme280 to i2c and execute "sudo i2cdetect -y 1"
-         *  BME280 is connected to 0x76 or 0x77
+         * Setup BME280 device id on i2c bus to verify connect bme280 to i2c and execute
+         * "sudo i2cdetect -y 1" BME280 is connected to 0x76 or 0x77
+         * 
          * @param deviceId - 0x76 or 0x77
          * @return this {@code Builder} instance
          * @throws IllegalArgumentException - if deviceId is not 0x76 or 0x77
          */
-        public Builder setBME280I2CDeviceId(int deviceId) {
+        public Builder setBME280I2CDeviceId(final int deviceId) {
             if (deviceId != 0x76 || deviceId != 0x77) {
                 throw new IllegalArgumentException();
             }
@@ -113,7 +113,7 @@ public class Bme289Config {
     /** 
      * private constructor. Builder should be used to create Bme280Config instance
      */
-    private Bme289Config() { 
+    private Bme280Config() { 
         bme280I2CDeviceId = 0x76;
         humidity = Oversampling.OVERSAMPLING1;
         temperature = Oversampling.OVERSAMPLING1;

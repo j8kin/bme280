@@ -16,11 +16,11 @@ import java.util.Map;
 class bme280RegistersTest {
 
     private final I2CDevice device;
-    private final Bme280Registers registers;
+    private final Bme280Sensor registers;
 
     bme280RegistersTest() {
         device = Mockito.mock(I2CDevice.class);
-        registers = new Bme280Registers(device);
+        registers = new Bme280Sensor(device);
     }
 
     /**
