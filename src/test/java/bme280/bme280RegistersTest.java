@@ -2,16 +2,22 @@ package Bme280;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+
+import java.util.Map;
 
 import jdk.dio.i2cbus.I2CDevice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 class Bme280RegistersTest {
 
     private final I2CDevice mockI2CDevice;
     private Bme280Sensor bme280Sensor;
 
-    bme280RegistersTest() {
+    Bme280RegistersTest() {
         mockI2CDevice = Mockito.mock(I2CDevice.class);
 
         ByteBuffer oneByte = ByteBuffer.allocateDirect(1);
