@@ -8,7 +8,7 @@ public class Bme289Config {
     private Oversampling pressure;
     private Filter filter;
     private Standby standby;
-    private I2CDevice bme280device;
+    private I2CDevice bme280Device;
 
 
     public static final  class Builder {
@@ -53,6 +53,22 @@ public class Bme289Config {
         }
     }
     
+    public Oversampling getHumidityControl() {
+        return humidity;
+    }
+    public Oversampling getTemperatureControl() {
+        return temperature;
+    }
+    public Oversampling getPressureControl() {
+        return pressure;
+    }
+    public Filter getFilter() {
+        return filter;
+    }
+    public Filter getStandby() {
+        return standby;
+    }
+
     /** 
      * private constructor. Builder should be used to create Bme280Config instance
      */
