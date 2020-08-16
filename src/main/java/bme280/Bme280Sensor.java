@@ -201,13 +201,13 @@ final public class Bme280Sensor {
     // The "Status" register contains two bits which indicates the status of the
     // device
     // |-----------|--------------|------------------------------------------------------|
-    // | bit #     | Name         | Descrition                                           |
+    // |  bit #    | Name         | Descrition                                           |
     // |-----------|--------------|------------------------------------------------------|
-    // |  3        | measuring[0] | Automatically set to '1' whenever a conversion is    |
+    // |    3      | measuring[0] | Automatically set to '1' whenever a conversion is    |
     // |           |              | running and back to '0' when the result have been    |
     // |           |              | transfered to the data registers.                    |
     // |-----------|--------------|------------------------------------------------------|
-    // |  0        | im_update[0] | Automatically set to '1' when the NVM data are being |
+    // |    0      | im_update[0] | Automatically set to '1' when the NVM data are being |
     // |           |              | copied to image registers and back to '0' when the   |
     // |           |              | copying is done. The data are copied at power-on-    |
     // |           |              | reset and before every conversion.                   |
@@ -228,17 +228,17 @@ final public class Bme280Sensor {
     // changes
     // to become effective.
     // |-----------|--------------|------------------------------------------------------|
-    // |   bits #  | Name         | Descrition                                           |
+    // |  bits #   | Name         | Descrition                                           |
     // |-----------|--------------|------------------------------------------------------|
-    // |   7,6,5   | osrs_t[2:0]  | Control oversampling of temperature data. See above. |
-    // |   4,3,2   | osrs_p[2:0]  | Control oversampling of pressure data. See above.    |
-    // |   1,0     | mode[1:0]    | Control the sensor mode of the device:               |
-    // |           |              |------------|-----------------------------------------|
-    // |           |              |  Value     | Mode                                    |
-    // |           |              |------------|-----------------------------------------|
-    // |           |              |   00       | Sleep Mode                              |
-    // |           |              | 01 and 10  | Forced Mode                             |
-    // |           |              |   11       | Normal Mode                             |
+    // |  7,6,5    | osrs_t[2:0]  | Control oversampling of temperature data. See above. |
+    // |  4,3,2    | osrs_p[2:0]  | Control oversampling of pressure data. See above.    |
+    // |  1,0      | mode[1:0]    | Control the sensor mode of the device:               |
+    // |           |              | ------------|----------------------------------------|
+    // |           |              |  Value      | Mode                                   |
+    // |           |              | ------------|----------------------------------------|
+    // |           |              |     00      | Sleep Mode                             |
+    // |           |              |  01 and 10  | Forced Mode                            |
+    // |           |              |     11      | Normal Mode                            |
     // |-----------|--------------|------------------------------------------------------|
     // private Oversampling getTemperatureControl() {
     //     return Oversampling.fromInteger((int) ((readRegister(0xF4) & 0xE0) >> 5));
@@ -284,32 +284,32 @@ final public class Bme280Sensor {
     // Writes to the "Config" register in normal mode may be ignored.
     // In Sleep mode writes are NOT ignored
     // |-----------|--------------|------------------------------------------------------|
-    // | bits #    | Name         | Descrition                                           |
+    // |  bits #   | Name         | Descrition                                           |
     // |-----------|--------------|------------------------------------------------------|
-    // |  7,6,5    | t_sb[2:0]    | Control inactive duration t-standby in normal mode:  |
-    // |           |              |-------------|----------------------------------------|
+    // |   7,6,5   | t_sb[2:0]    | Control inactive duration t-standby in normal mode:  |
+    // |           |              | ------------|----------------------------------------|
     // |           |              |  Value      | T-Standby (ms)                         |
-    // |           |              |-------------|----------------------------------------|
-    // |           |              |   000       | 0.5                                    |
-    // |           |              |   001       | 62.5                                   |
-    // |           |              |   010       | 125                                    |
-    // |           |              |   011       | 250                                    |
-    // |           |              |   100       | 500                                    |
-    // |           |              |   101       | 1000 (1 sec)                           |
-    // |           |              |   110       | 10 (???? may be it is 10 sec)          |
-    // |           |              |   111       | 20 (???? may be it is 20 sec)          |
+    // |           |              | ------------|----------------------------------------|
+    // |           |              |     000     | 0.5                                    |
+    // |           |              |     001     | 62.5                                   |
+    // |           |              |     010     | 125                                    |
+    // |           |              |     011     | 250                                    |
+    // |           |              |     100     | 500                                    |
+    // |           |              |     101     | 1000                                   |
+    // |           |              |     110     | 10 (???? may be it is 10 sec)          |
+    // |           |              |     111     | 20 (???? may be it is 20 sec)          |
     // |-----------|--------------|------------------------------------------------------|
-    // |  4,3,2    | filter[2:0]  | Controls the time constant of IIR filer              |
-    // |           |              |-------------|----------------------------------------|
+    // |   4,3,2   | filter[2:0]  | Controls the time constant of IIR filer              |
+    // |           |              | ------------|----------------------------------------|
     // |           |              |  Value      | Filter coefficient                     |
-    // |           |              |-------------|----------------------------------------|
-    // |           |              |   000       | Filter off                             |
-    // |           |              |   001       | 2                                      |
-    // |           |              |   010       | 4                                      |
-    // |           |              |   011       | 8                                      |
-    // |           |              |  100, other | 16                                     |
+    // |           |              | ------------|----------------------------------------|
+    // |           |              |     000     | Filter off                             |
+    // |           |              |     001     | 2                                      |
+    // |           |              |     010     | 4                                      |
+    // |           |              |     011     | 8                                      |
+    // |           |              | 100, other  | 16                                     |
     // |-----------|--------------|------------------------------------------------------|
-    // |  0        | spi3w_en[0]  | Enables 3-wire SPI interface when set to 1           |
+    // |     0     | spi3w_en[0]  | Enables 3-wire SPI interface when set to 1           |
     // |-----------|--------------|------------------------------------------------------|
     // private Standby getStandby() {
     //     return Standby.fromInteger((int) (readRegister(0xF5) & 0xE0) >> 5);
@@ -405,29 +405,29 @@ final public class Bme280Sensor {
 
     // Calibration Parameter Table 16:
     // |----------------|-------------------|-----------------|
-    // |   Register     | Register Context  | Data type       |
-    // |   Address      |                   |                 |
+    // |    Register    |  Register Context | Data type       |
+    // |    Address     |                   |                 |
     // |----------------|-------------------|-----------------|
-    // | 0x88/0x89      | digT1[7:0]/[15:8] | unsigned short  |
-    // | 0x8A/0x8B      | digT2[7:0]/[15:8] | signed short    |
-    // | 0x8C/0x8D      | digT3[7:0]/[15:8] | signed short    |
+    // |   0x88/0x89    | digT1[7:0]/[15:8] | unsigned short  |
+    // |   0x8A/0x8B    | digT2[7:0]/[15:8] | signed short    |
+    // |   0x8C/0x8D    | digT3[7:0]/[15:8] | signed short    |
     // |                |                   |                 |
-    // | 0x8E/0x8F      | digP1[7:0]/[15:8] | unsigned short  |
-    // | 0x90/0x91      | digP2[7:0]/[15:8] | signed short    |
-    // | 0x92/0x93      | digP3[7:0]/[15:8] | signed short    |
-    // | 0x94/0x95      | digP4[7:0]/[15:8] | signed short    |
-    // | 0x96/0x97      | digP5[7:0]/[15:8] | signed short    |
-    // | 0x98/0x99      | digP6[7:0]/[15:8] | signed short    |
-    // | 0x9A/0x9B      | digP7[7:0]/[15:8] | signed short    |
-    // | 0x9C/0x9D      | digP8[7:0]/[15:8] | signed short    |
-    // | 0x9E/0x9F      | digP9[7:0]/[15:8] | signed short    |
+    // |   0x8E/0x8F    | digP1[7:0]/[15:8] | unsigned short  |
+    // |   0x90/0x91    | digP2[7:0]/[15:8] | signed short    |
+    // |   0x92/0x93    | digP3[7:0]/[15:8] | signed short    |
+    // |   0x94/0x95    | digP4[7:0]/[15:8] | signed short    |
+    // |   0x96/0x97    | digP5[7:0]/[15:8] | signed short    |
+    // |   0x98/0x99    | digP6[7:0]/[15:8] | signed short    |
+    // |   0x9A/0x9B    | digP7[7:0]/[15:8] | signed short    |
+    // |   0x9C/0x9D    | digP8[7:0]/[15:8] | signed short    |
+    // |   0x9E/0x9F    | digP9[7:0]/[15:8] | signed short    |
     // |                |                   |                 |
-    // | 0xA1           | digH1[7:0]        | unsigned char   | !!!!
-    // | 0xE1/0xE2      | digH2[7:0]/[15:8] | signed short    |
-    // | 0xE3           | digH3[7:0]        | unsigned char   | !!!!
+    // |      0xA1      | digH1[7:0]        | unsigned char   | !!!!
+    // |   0xE1/0xE2    | digH2[7:0]/[15:8] | signed short    |
+    // |      0xE3      | digH3[7:0]        | unsigned char   | !!!!
     // | 0xE4/0xE5[3:0] | digH4[11:4]/[3:0] | unsigned short  | !!!!
     // | 0xE5[7:4]/0xE6 | digH5[3:0]/[11:4] | unsigned short  | !!!!
-    // | 0xE7           | digH6[7:0]        | signed char     |
+    // |      0xE7      | digH6[7:0]        | signed char     |
     // |----------------|-------------------|-----------------|
     /**
      * Read Calibration Data from sensor and return as Map
