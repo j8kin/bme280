@@ -1,14 +1,11 @@
-package Bme280;
+package bme280;
 
-import org.junit.jupiter.api.Test;
+import java.util.Map;
 import org.mockito.Mockito;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
-import java.util.Map;
-
 import jdk.dio.i2cbus.I2CDevice;
-
+import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -56,12 +53,11 @@ class Bme280RegistersTest {
             });
 
             bme280Sensor = new Bme280Sensor(
-                    new Bme280Config.Builder().setOversampling(SensorType.TEMPERATURE, Oversampling.SKIPPED)
-                            .setOversampling(SensorType.PRESSURE, Oversampling.SKIPPED)
-                            .setOversampling(SensorType.HUMIDITY, Oversampling.SKIPPED).setFilter(Filter.OFF)
-                            .setStandBy(Standby.MSEC5).setI2CDevice(mockI2CDevice).build());
+                    new Bme280Config.Builder().setOversampling(Bme280SensorType.TEMPERATURE, Bme280Oversampling.SKIPPED)
+                            .setOversampling(Bme280SensorType.PRESSURE, Bme280Oversampling.SKIPPED)
+                            .setOversampling(Bme280SensorType.HUMIDITY, Bme280Oversampling.SKIPPED).setFilter(Bme280Filter.OFF)
+                            .setStandBy(Bme280Standby.MSEC5).setI2CDevice(mockI2CDevice).build());
         }
-
         catch (Exception e) {
             fail("Unable to initialize test");
         }
@@ -136,18 +132,18 @@ class Bme280RegistersTest {
                 return 1;
             });
 
-            ByteBuffer src = ByteBuffer.allocateDirect(8).put(Oversampling.OVERSAMPLING8.toByte()).rewind();
+            ByteBuffer src = ByteBuffer.allocateDirect(8).put(Bme280Oversampling.OVERSAMPLING8.toByte()).rewind();
             Mockito.when(mockI2CDevice.write(0xF2, 1, src)).thenAnswer(invocation -> {
                 Object[] args = invocation.getArguments();
 
-                assertEquals(Oversampling.OVERSAMPLING8.toByte(), ((ByteBuffer) args[2]).rewind().get());
+                assertEquals(Bme280Oversampling.OVERSAMPLING8.toByte(), ((ByteBuffer) args[2]).rewind().get());
 
                 return 1;
             });
         } catch (Exception e) {
             fail("Device could not be read");
         }
-        bme280Sensor.setHumidityControl(Oversampling.OVERSAMPLING8);
+        bme280Sensor.setHumidityControl(Bme280Oversampling.OVERSAMPLING8);
 
         assertTrue(true, "Humidity Control set successfully");
     }
@@ -322,27 +318,27 @@ class Bme280RegistersTest {
             fail("Device could not be read");
         }
 
-        Map<Calibration, Long> calibration = bme280Sensor.getCalibrationParameters();
+        Map<Bme280Calibration, Long> calibration = bme280Sensor.getCalibrationParameters();
 
-        assertEquals(0x8988, calibration.get(Calibration.digT1));
-        assertEquals(-29814, calibration.get(Calibration.digT2));
-        assertEquals(-32768, calibration.get(Calibration.digT3));
+        assertEquals(0x8988, calibration.get(Bme280Calibration.digT1));
+        assertEquals(-29814, calibration.get(Bme280Calibration.digT2));
+        assertEquals(-32768, calibration.get(Bme280Calibration.digT3));
 
-        assertEquals(0x7FFF, calibration.get(Calibration.digP1));
-        assertEquals(0x0000, calibration.get(Calibration.digP2));
-        assertEquals(-1, calibration.get(Calibration.digP3));
-        assertEquals(0x0001, calibration.get(Calibration.digP4));
-        assertEquals(-256, calibration.get(Calibration.digP5));
-        assertEquals(0x00FF, calibration.get(Calibration.digP6));
-        assertEquals(0x0FFF, calibration.get(Calibration.digP7));
-        assertEquals(-28673, calibration.get(Calibration.digP8));
-        assertEquals(-4096, calibration.get(Calibration.digP9));
+        assertEquals(0x7FFF, calibration.get(Bme280Calibration.digP1));
+        assertEquals(0x0000, calibration.get(Bme280Calibration.digP2));
+        assertEquals(-1, calibration.get(Bme280Calibration.digP3));
+        assertEquals(0x0001, calibration.get(Bme280Calibration.digP4));
+        assertEquals(-256, calibration.get(Bme280Calibration.digP5));
+        assertEquals(0x00FF, calibration.get(Bme280Calibration.digP6));
+        assertEquals(0x0FFF, calibration.get(Bme280Calibration.digP7));
+        assertEquals(-28673, calibration.get(Bme280Calibration.digP8));
+        assertEquals(-4096, calibration.get(Bme280Calibration.digP9));
 
-        assertEquals(0xFF, calibration.get(Calibration.digH1));
-        assertEquals(-2, calibration.get(Calibration.digH2));
-        assertEquals(0x80, calibration.get(Calibration.digH3));
-        assertEquals(0xFF5, calibration.get(Calibration.digH4));
-        assertEquals(0xAA7, calibration.get(Calibration.digH5));
-        assertEquals(-128, calibration.get(Calibration.digH6));
+        assertEquals(0xFF, calibration.get(Bme280Calibration.digH1));
+        assertEquals(-2, calibration.get(Bme280Calibration.digH2));
+        assertEquals(0x80, calibration.get(Bme280Calibration.digH3));
+        assertEquals(0xFF5, calibration.get(Bme280Calibration.digH4));
+        assertEquals(0xAA7, calibration.get(Bme280Calibration.digH5));
+        assertEquals(-128, calibration.get(Bme280Calibration.digH6));
     }
 }

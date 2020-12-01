@@ -1,28 +1,30 @@
-package Bme280;
+package bme280;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
 import java.util.Map;
-
+import jdk.dio.i2cbus.I2CDevice;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import jdk.dio.i2cbus.I2CDevice;
 
 /**
  * Bme280 Sensor.
  * Register description see Section 5 from bme280 datasheet (BST-BME280-DS002.pdf)
  */
-final public class Bme280Sensor {
-    private final static Logger logger = LogManager.getLogger(Bme280Sensor.class);
+public final class Bme280Sensor {
+    private static final Logger LOGGER = LogManager.getLogger(Bme280Sensor.class);
     private I2CDevice device;
 
     @Deprecated
     private Bme280Sensor() {
         throw new AssertionError();
-    };
+    }
 
+    /**
+     * Default constructor.
+     * @param bme280Config - input bme 280 device Configuration
+     */
     public Bme280Sensor(Bme280Config bme280Config) {
         device = bme280Config.getI2cDevice();
 
@@ -35,8 +37,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Convert Byte Buffer to long (8 byte???)
-     * 
+     * Convert Byte Buffer to long (8 byte???).
+     *
      * @param buffer - buffer to convert
      * @return - converted value
      */
@@ -67,8 +69,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Convert long (8 byte ???) to ByteBuffer
-     * 
+     * Convert long (8 byte ???) to ByteBuffer.
+     *
      * @param value - long value
      * @return - converted value
      */
@@ -86,8 +88,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Read one byte of data from Register
-     * 
+     * Read one byte of data from Register.
+     *
      * @param register - register of BME280 to be read (0xD0, 0xE0, etc)
      * @return bme280 register value (unsigned)
      */
@@ -96,8 +98,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Read number of bytes from bme280 register
-     * 
+     * Read number of bytes from bme280 register.
+     *
      * @param register - register to be read
      * @param size     - number of bytes to be read
      * @return bme280 register data as unsigned value
@@ -119,8 +121,8 @@ final public class Bme280Sensor {
                     register == 0xFB || // temperature LSB
                     register == 0xFC || // temperature XLSB (bits [7:4]) + 0 (bits [3:0])
                     register == 0xFD || // humidity MSB
-                    register == 0xFE // humidity LSB
-            ;
+                    register == 0xFE; // humidity LSB
+
             ByteBuffer dst = ByteBuffer.allocateDirect(size);
             int nBytesRead = device.read(register, size, 0, dst);
 
@@ -128,14 +130,14 @@ final public class Bme280Sensor {
 
             return byteBufferToLong(dst);
         } catch (Exception e) {
-            logger.atError().withThrowable(e).log("Unable to readRegister request.");
+            LOGGER.atError().withThrowable(e).log("Unable to readRegister request.");
         }
         return -1;
     }
 
     /**
-     * Write one byte of data into bme280 register
-     * 
+     * Write one byte of data into bme280 register.
+     *
      * @param register - register to be write (0xF5, 0xF4, 0xF2, 0xE0)
      * @param data     - data to be written (one byte)
      */
@@ -144,8 +146,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Write up to 8 bytes
-     * 
+     * Write up to 8 bytes.
+     *
      * @param register - register to be write (0xF5, 0xF4, 0xF2, 0xE0)
      * @param data     - up to 8 bytes to be written
      * @param size     - size (1 to 8)
@@ -158,13 +160,13 @@ final public class Bme280Sensor {
             int nBytesWrite = device.write(register, size, src);
             assert nBytesWrite == size;
         } catch (Exception e) {
-            logger.atError().withThrowable(e).log("Unable to writeRegister request.");
+            LOGGER.atError().withThrowable(e).log("Unable to writeRegister request.");
         }
     }
 
-    /** 
+    /**
      * The "id" register (0xD0) contains chip identification number chip_id[7:0], which is 0x60.
-     * This numder can be read as soon as device finished the power-on-reser
+     * This numder can be read as soon as device finished the power-on-reser.
      * @return register (which always should contains 0x60)
      */
     public long getId() {
@@ -173,26 +175,34 @@ final public class Bme280Sensor {
         return id;
     }
 
-    // The "reset" register (0xE0) contains the soft reset word reset [7:0].
-    // If the value 0xB6 is written to the register, the device is reset using the
-    // complete power-on reset procedure.
-    // Writing other values then 0xB6 has no effect,
-    // The readout value is always 0x00
+    /**
+     * The "reset" register (0xE0) contains the soft reset word reset [7:0].
+     * If the value 0xB6 is written to the register, the device is reset using the
+     * complete power-on reset procedure.
+     * Writing other values then 0xB6 has no effect.
+     * The readout value is always 0x00.
+     */
     public void reset() {
         writeRegister(0xE0, 0xB6);
     }
 
-    // The "humidityControl" register sets the humidity data acquisition of the
-    // device
-    // Attention!!!
-    // Changes to this register only become effective after a write operation to
-    // measurmentControl
-    // Only bits 2:0 are used as oversampling (see Oversampling Table above)
-    // private Oversampling getHumidityControl() {
-    //     return Oversampling.fromInteger(((int) readRegister(0xF2) & 0x07));
-    // }
+    /**
+     * The "humidityControl" register sets the humidity data acquisition of the
+     * device.
+     * Attention!!!
+     * Changes to this register only become effective after a write operation to
+     * measurmentControl.
+     * Only bits 2:0 are used as oversampling (see Oversampling Table above)
+     */
+    public Bme280Oversampling getHumidityControl() {
+        return Bme280Oversampling.fromInteger((int) readRegister(0xF2) & 0x07);
+    }
 
-    public void setHumidityControl(Oversampling oversampling) {
+    /**
+     * Set Humidity control oversampling value.
+     * @param oversampling - new humidity oversampling
+     */
+    public void setHumidityControl(Bme280Oversampling oversampling) {
         long data = readRegister(0xF2) & 0xF8; // set humidity control bits to zero
         data |= oversampling.toByte(); // place temperature oversampling into bits [2:0]
         writeRegister(0xF2, data);
@@ -261,19 +271,31 @@ final public class Bme280Sensor {
     //     }
     // }
 
-    public void setTemperatureControl(Oversampling oversampling) {
+    /**
+     * Set Temperature oversampling.
+     * @param oversampling - new temperature oversampling
+     */
+    public void setTemperatureControl(Bme280Oversampling oversampling) {
         long data = readRegister(0xF4) & 0x01F; // store only current pressure control and mode
         data |= oversampling.toByte() << 5; // place temperature oversampling into bits [7:5]
         writeRegister(0xF4, data);
     }
 
-    public void setPressureControl(Oversampling oversampling) {
+    /**
+     * Set Pressure Oversampling.
+     * @param oversampling - new Pressure oversampling
+     */
+    public void setPressureControl(Bme280Oversampling oversampling) {
         long data = readRegister(0xF4) & 0x0E3; // store only current temperature control and mode
         data |= oversampling.toByte() << 2; // place temperature oversampling into bits [4:2]
         writeRegister(0xF4, data);
     }
 
-    public void setMode(Mode mode) {
+    /**
+     * Set sensor mode.
+     * @param mode - new sensor mode
+     */
+    public void setMode(Bme280Mode mode) {
         long data = readRegister(0xF4) & 0x0FC; // store only current temperature and humidity control
         data |= mode.toByte(); // place temperature oversampling into bits [1:0]
         writeRegister(0xF4, data);
@@ -323,27 +345,40 @@ final public class Bme280Sensor {
     //     return (readRegister(0xF5) & 0x01) == 1;
     // }
 
-    public void setStandby(Standby value) {
+    /**
+     * Set sensor standby mode.
+     * @param value - new standby mode
+     */
+    public void setStandby(Bme280Standby value) {
         long data = readRegister(0xF5) & 0x01F; // store only filter coefficient and SPI Enabled
         data |= value.toByte() << 5; // place temperature oversampling into bits [7:5]
         writeRegister(0xF5, data);
     }
 
-    public void setFilter(Filter value) {
+    /**
+     * Set sensor filter.
+     * @param value - new sensor filter
+     */
+    public void setFilter(Bme280Filter value) {
         long data = readRegister(0xF5) & 0x0E3; // store only T-Standby and SPI Enabled
         data |= value.toByte() << 2; // place temperature oversampling into bits [4:2]
         writeRegister(0xF5, data);
     }
 
+    /**
+     * Enable/Disable sensor filter.
+     * @param enable - enable/disable sensor filtering
+     */
     public void setFilter(boolean enable) {
         long data = readRegister(0xF5) & 0x0FE; // store only T-Standby and filter coefficient
         data |= enable ? 0b1 : 0b0; // place temperature oversampling into bits [4:2]
         writeRegister(0xF5, data);
     }
 
-    // The "Pressure" registers contains raw pressure measurment output data up to
-    // [19:0].
-    // For more info see Chapter 4 of BME datasheet
+    /**
+     * The "Pressure" registers contains raw pressure measurment output data up to [19:0].
+     * For more info see Chapter 4 of BME datasheet.
+     */
     public long getRawPressure() {
         // todo: to think how to use readRegister(0xF7, 3) - read all 3 bytes at once
         long msb = readRegister(0xF7);
@@ -353,9 +388,10 @@ final public class Bme280Sensor {
         return (xlbs << 15) | (lbs << 7) | msb;
     }
 
-    // The "Temperature" registers contains raw pressure measurment output data up
-    // to [19:0].
-    // For more info see Chapter 4 of BME datasheet
+    /**
+     * The "Temperature" registers contains raw pressure measurment output data up to [19:0].
+     * For more info see Chapter 4 of BME datasheet.
+     */
     public long getRawTemperature() {
         // todo: to think how to use readRegister(0xFA, 3) - read all 3 bytes at once
         long msb = readRegister(0xFA);
@@ -365,9 +401,9 @@ final public class Bme280Sensor {
         return (xlbs << 15) | (lbs << 7) | msb;
     }
 
-    // The "Humidity" registers contains raw pressure measurment output data up to
-    // [15:0].
-    // For more info see Chapter 4 of BME datasheet
+    /** The "Humidity" registers contains raw pressure measurment output data up to [15:0].
+     * For more info see Chapter 4 of BME datasheet.
+     */
     public long getRawHumidity() {
         // todo: to think how to use readRegister(0xFD, 2) - read all 2 bytes at once
         long msb = readRegister(0xFD);
@@ -377,8 +413,8 @@ final public class Bme280Sensor {
     }
 
     /**
-     * Convert unsigned value to signed based on number of bytes in input
-     * 
+     * Convert unsigned value to signed based on number of bytes in input.
+     *
      * @param input  - input integer number (unsigned)
      * @param nBytes - number of bytes in word (1, 2, 4, 8)
      * @return signed number
@@ -430,37 +466,39 @@ final public class Bme280Sensor {
     // |      0xE7      | digH6[7:0]        | signed char     |
     // |----------------|-------------------|-----------------|
     /**
-     * Read Calibration Data from sensor and return as Map
-     * 
+     * Read Calibration Data from sensor and return as Map.
+     *
      * @return Calibration Data
      */
-    public Map<Calibration, Long> getCalibrationParameters() {
-        Map<Calibration, Long> result = new HashMap<Calibration, Long>();
+    public Map<Bme280Calibration, Long> getCalibrationParameters() {
+        Map<Bme280Calibration, Long> result = new HashMap<Bme280Calibration, Long>();
 
         // fill Calibration data for temperature
-        result.put(Calibration.digT1, readRegister(0x88, 2)); // unsigned
-        result.put(Calibration.digT2, toSigned(readRegister(0x8A, 2), 2));
-        result.put(Calibration.digT2, toSigned(readRegister(0x8A, 2), 2));
-        result.put(Calibration.digT3, toSigned(readRegister(0x8C, 2), 2));
+        result.put(Bme280Calibration.digT1, readRegister(0x88, 2)); // unsigned
+        result.put(Bme280Calibration.digT2, toSigned(readRegister(0x8A, 2), 2));
+        result.put(Bme280Calibration.digT2, toSigned(readRegister(0x8A, 2), 2));
+        result.put(Bme280Calibration.digT3, toSigned(readRegister(0x8C, 2), 2));
 
         // fill Calibration data for Pressure
-        result.put(Calibration.digP1, readRegister(0x8E, 2));
-        result.put(Calibration.digP2, toSigned(readRegister(0x90, 2), 2));
-        result.put(Calibration.digP3, toSigned(readRegister(0x92, 2), 2));
-        result.put(Calibration.digP4, toSigned(readRegister(0x94, 2), 2));
-        result.put(Calibration.digP5, toSigned(readRegister(0x96, 2), 2));
-        result.put(Calibration.digP6, toSigned(readRegister(0x98, 2), 2));
-        result.put(Calibration.digP7, toSigned(readRegister(0x9A, 2), 2));
-        result.put(Calibration.digP8, toSigned(readRegister(0x9C, 2), 2));
-        result.put(Calibration.digP9, toSigned(readRegister(0x9E, 2), 2));
+        result.put(Bme280Calibration.digP1, readRegister(0x8E, 2));
+        result.put(Bme280Calibration.digP2, toSigned(readRegister(0x90, 2), 2));
+        result.put(Bme280Calibration.digP3, toSigned(readRegister(0x92, 2), 2));
+        result.put(Bme280Calibration.digP4, toSigned(readRegister(0x94, 2), 2));
+        result.put(Bme280Calibration.digP5, toSigned(readRegister(0x96, 2), 2));
+        result.put(Bme280Calibration.digP6, toSigned(readRegister(0x98, 2), 2));
+        result.put(Bme280Calibration.digP7, toSigned(readRegister(0x9A, 2), 2));
+        result.put(Bme280Calibration.digP8, toSigned(readRegister(0x9C, 2), 2));
+        result.put(Bme280Calibration.digP9, toSigned(readRegister(0x9E, 2), 2));
 
         // // fill Calibration data for Humidity
-        result.put(Calibration.digH1, readRegister(0xA1, 1));
-        result.put(Calibration.digH2, toSigned(readRegister(0xE1, 2), 2));
-        result.put(Calibration.digH3, readRegister(0xE3, 1));
-        result.put(Calibration.digH4, readRegister(0xE4, 1) << 4 | (readRegister(0xE5, 1) & 0x0F)); // 0xE4/0xE5[3:0]
-        result.put(Calibration.digH5, readRegister(0xE6, 1) << 4 | ((readRegister(0xE5, 1) & 0xF0) >> 4)); // 0xE5[7:4]/0xE6
-        result.put(Calibration.digH6, toSigned(readRegister(0xE7, 1), 1));
+        result.put(Bme280Calibration.digH1, readRegister(0xA1, 1));
+        result.put(Bme280Calibration.digH2, toSigned(readRegister(0xE1, 2), 2));
+        result.put(Bme280Calibration.digH3, readRegister(0xE3, 1));
+        // 0xE4/0xE5[3:0]
+        result.put(Bme280Calibration.digH4, readRegister(0xE4, 1) << 4 | (readRegister(0xE5, 1) & 0x0F));
+        // 0xE5[7:4]/0xE6
+        result.put(Bme280Calibration.digH5, readRegister(0xE6, 1) << 4 | ((readRegister(0xE5, 1) & 0xF0) >> 4));
+        result.put(Bme280Calibration.digH6, toSigned(readRegister(0xE7, 1), 1));
 
         return result;
     }

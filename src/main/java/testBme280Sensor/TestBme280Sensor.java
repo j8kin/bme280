@@ -1,21 +1,27 @@
 package testBme280Sensor;
 
-import Bme280.Bme280Config;
-import Bme280.Bme280Sensor;
+import bme280.Bme280Config;
+import bme280.Bme280Sensor;
 
+/**
+ * Integration test for BME 280 Sensor class.
+ */
 public final class TestBme280Sensor {
 
+    /** 
+     * Test Sensor.
+     */
     private final Bme280Sensor bme280Sensor;
 
     /**
-     * Default constructor which use device address 0x76
+     * Default constructor which use device address 0x76.
      */
     public TestBme280Sensor() throws Exception {
         this(0x76);
     }
 
     /**
-     * Public constructor
+     * Public constructor.
      * 
      * @param deviceId - bme280 device id (it could be 0x90 or tbd)
      */
@@ -24,6 +30,9 @@ public final class TestBme280Sensor {
         bme280Sensor = new Bme280Sensor(new Bme280Config.Builder().build());
     }
 
+    /**
+     * Integration test for BME 280 Sensor.
+     */
     public static void main(String[] args) {
         try {
             TestBme280Sensor testSensor = new TestBme280Sensor();
@@ -34,4 +43,4 @@ public final class TestBme280Sensor {
             System.out.println("Unhandled exception:\n" + e.toString());
         }
     }
-};
+}
